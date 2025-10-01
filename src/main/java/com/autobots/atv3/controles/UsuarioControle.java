@@ -4,16 +4,8 @@ import java.util.List;
 import java.util.Set;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
 import com.autobots.atv3.entidades.Empresa;
 import com.autobots.atv3.entidades.usuario.Usuario;
@@ -43,7 +35,7 @@ public class UsuarioControle {
         }
     }
 
-    @GetMapping("/usuarios")
+    @GetMapping
     public ResponseEntity<List<Usuario>> obterUsuarios() {
         List<Usuario> usuarios = repositorio.findAll();
         if (usuarios.isEmpty()) {
@@ -54,7 +46,7 @@ public class UsuarioControle {
         }
     }
 
-    @PostMapping("/registrar")
+    @PostMapping("/registrar/{empresaId}")
     public ResponseEntity<Usuario> registrarUsuario(@PathVariable Long empresaId, @RequestBody Usuario novo) {
         Empresa empresa = empresaRepositorio.findById(empresaId).orElse(null);
         if (empresa == null) {
@@ -66,7 +58,7 @@ public class UsuarioControle {
         return new ResponseEntity<>(usuario, HttpStatus.CREATED);
     }
 
-    @PutMapping("/atualizar")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<Usuario> atualizarUsuario(@PathVariable Long id, @PathVariable Long empresaId, @RequestBody Usuario atualizado) {
         Usuario usuario = repositorio.findById(id).orElse(null);
         Empresa empresa = empresaRepositorio.findById(empresaId).orElse(null);
@@ -92,7 +84,7 @@ public class UsuarioControle {
         return new ResponseEntity<>(salvo, HttpStatus.OK);
     }
 
-    @DeleteMapping("/deletar")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<Usuario> deletarUsuario(@PathVariable Long id) {
         Usuario usuario = repositorio.findById(id).orElse(null);
         if (usuario == null) {

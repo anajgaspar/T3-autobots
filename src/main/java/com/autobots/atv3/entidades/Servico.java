@@ -1,18 +1,15 @@
 package com.autobots.atv3.entidades;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import org.springframework.hateoas.RepresentationModel;
 
-@EqualsAndHashCode
+import lombok.*;
+
 @Data
 @Entity
-public class Servico {
+@EqualsAndHashCode(callSuper = false)
+public class Servico extends RepresentationModel<Servico> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -22,4 +19,6 @@ public class Servico {
 	private double valor;
 	@Column
 	private String descricao;
+	@ManyToOne
+	private Empresa empresa;
 }

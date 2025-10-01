@@ -2,19 +2,19 @@ package com.autobots.atv3.entidades.usuario;
 
 import java.util.Date;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import org.springframework.hateoas.RepresentationModel;
 
 import com.autobots.atv3.enumeracoes.TipoDocumento;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-public class Documento {
+@EqualsAndHashCode(callSuper = false)
+public class Documento extends RepresentationModel<Documento> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

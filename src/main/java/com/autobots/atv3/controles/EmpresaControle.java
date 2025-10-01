@@ -3,16 +3,8 @@ package com.autobots.atv3.controles;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.*;
+import org.springframework.web.bind.annotation.*;
 
 import com.autobots.atv3.entidades.Empresa;
 import com.autobots.atv3.links.EmpresaAdicionadorLink;
@@ -37,7 +29,7 @@ public class EmpresaControle {
         }
     }
 
-    @GetMapping("/empresas")
+    @GetMapping
     public ResponseEntity<List<Empresa>> obterEmpresas() {
         List<Empresa> empresas = repositorio.findAll();
         if (empresas.isEmpty()) {
@@ -55,7 +47,7 @@ public class EmpresaControle {
         return new ResponseEntity<>(empresa, HttpStatus.CREATED);
     }
 
-    @PutMapping("/atualizar")
+    @PutMapping("/atualizar/{id}")
     public ResponseEntity<Empresa> atualizarEmpresa(@PathVariable Long id, @RequestBody Empresa atualizada) {
         Empresa empresa = repositorio.findById(id).orElse(null);
         if (empresa == null) {
@@ -67,7 +59,7 @@ public class EmpresaControle {
         return new ResponseEntity<>(salva, HttpStatus.OK);
     }
 
-    @DeleteMapping("/deletar")
+    @DeleteMapping("/deletar/{id}")
     public ResponseEntity<?> deletarEmpresa(@PathVariable Long id) {
         Empresa empresa = repositorio.findById(id).orElse(null);
         if (empresa == null) {

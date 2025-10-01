@@ -1,16 +1,16 @@
 package com.autobots.atv3.entidades.usuario;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
+
+import org.springframework.hateoas.RepresentationModel;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 @Data
 @Entity
-public class Email {
+@EqualsAndHashCode(callSuper = false)
+public class Email extends RepresentationModel<Email> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

@@ -7,9 +7,7 @@ import lombok.*;
 @Data
 @Entity
 @EqualsAndHashCode(callSuper = true)
-public class CredencialUsuarioSenha extends Credencial {
+public class CredencialCodigoBarra extends Credencial {
 	@Column(nullable = false, unique = true)
-	private String nomeUsuario;
-	@Column(nullable = false)
-	private String senha;
+	private long codigo;
 }

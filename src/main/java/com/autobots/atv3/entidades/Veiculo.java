@@ -1,28 +1,20 @@
 package com.autobots.atv3.entidades;
 
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
+import javax.persistence.*;
+
+import org.springframework.hateoas.RepresentationModel;
 
 import com.autobots.atv3.entidades.usuario.Usuario;
 import com.autobots.atv3.enumeracoes.TipoVeiculo;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @Data
-@EqualsAndHashCode(exclude = { "proprietario", "vendas" })
 @Entity
-public class Veiculo {
+@EqualsAndHashCode(exclude = { "proprietario", "vendas" }, callSuper = false)
+public class Veiculo extends RepresentationModel<Veiculo> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;

@@ -3,33 +3,21 @@ package com.autobots.atv3.entidades.usuario;
 import java.util.HashSet;
 import java.util.Set;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.ElementCollection;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.OneToOne;
+import javax.persistence.*;
 
 import org.springframework.hateoas.RepresentationModel;
 
-import com.autobots.atv3.entidades.Credencial;
 import com.autobots.atv3.entidades.Empresa;
 import com.autobots.atv3.entidades.Mercadoria;
 import com.autobots.atv3.entidades.Veiculo;
 import com.autobots.atv3.entidades.Venda;
 import com.autobots.atv3.enumeracoes.PerfilUsuario;
 
-import lombok.Data;
-import lombok.EqualsAndHashCode;
+import lombok.*;
 
 @Data
-@EqualsAndHashCode(exclude = { "mercadorias", "vendas", "veiculos" })
 @Entity
+@EqualsAndHashCode(exclude = { "mercadorias", "vendas", "veiculos" }, callSuper = true)
 public class Usuario extends RepresentationModel<Usuario> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
