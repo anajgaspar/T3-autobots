@@ -11,10 +11,14 @@ import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
+import javax.persistence.ManyToOne;
 import javax.persistence.OneToMany;
 import javax.persistence.OneToOne;
 
+import org.springframework.hateoas.RepresentationModel;
+
 import com.autobots.atv3.entidades.Credencial;
+import com.autobots.atv3.entidades.Empresa;
 import com.autobots.atv3.entidades.Mercadoria;
 import com.autobots.atv3.entidades.Veiculo;
 import com.autobots.atv3.entidades.Venda;
@@ -26,7 +30,7 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(exclude = { "mercadorias", "vendas", "veiculos" })
 @Entity
-public class Usuario {
+public class Usuario extends RepresentationModel<Usuario> {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
@@ -52,4 +56,6 @@ public class Usuario {
 	private Set<Venda> vendas = new HashSet<>();
 	@OneToMany(fetch = FetchType.EAGER, cascade = { CascadeType.PERSIST, CascadeType.MERGE, CascadeType.REFRESH })
 	private Set<Veiculo> veiculos = new HashSet<>();
+	@ManyToOne
+	private Empresa empresa;
 }
