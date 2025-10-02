@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import com.autobots.atv3.DTO.TelefoneDTO;
 import com.autobots.atv3.entidades.usuario.Telefone;
 import com.autobots.atv3.links.TelefoneAdicionadorLink;
 import com.autobots.atv3.repositorios.TelefoneRepositorio;
@@ -19,42 +20,46 @@ public class TelefoneControle {
     private TelefoneAdicionadorLink adicionadorLink;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Telefone> obterTelefone(@PathVariable Long id) {
+    public ResponseEntity<TelefoneDTO> obterTelefone(@PathVariable Long id) {
         Telefone telefone = repositorio.findById(id).orElse(null);
         if (telefone == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         adicionadorLink.adicionarLink(telefone);
-        return new ResponseEntity<>(telefone, HttpStatus.OK);
+        TelefoneDTO dto = converterParaDTO(telefone);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<Telefone>> obterTelefones() {
+    public ResponseEntity<List<TelefoneDTO>> obterTelefones() {
         List<Telefone> telefones = repositorio.findAll();
         if (telefones.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         adicionadorLink.adicionarLink(telefones);
-        return new ResponseEntity<>(telefones, HttpStatus.OK);
+        List<TelefoneDTO> dtos = telefones.stream().map(this::converterParaDTO).toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<Telefone> registrarTelefone(@RequestBody Telefone novo) {
+    public ResponseEntity<TelefoneDTO> registrarTelefone(@RequestBody TelefoneDTO novoDTO) {
+        Telefone novo = converterParaEntidade(novoDTO);
         Telefone salvo = repositorio.save(novo);
         adicionadorLink.adicionarLink(salvo);
-        return new ResponseEntity<>(salvo, HttpStatus.CREATED);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.CREATED);
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<Telefone> atualizarTelefone(@PathVariable Long id, @RequestBody Telefone atualizado) {
+    public ResponseEntity<TelefoneDTO> atualizarTelefone(@PathVariable Long id, @RequestBody TelefoneDTO atualizadoDTO) {
         Telefone telefone = repositorio.findById(id).orElse(null);
         if (telefone == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        Telefone atualizado = converterParaEntidade(atualizadoDTO);
         atualizado.setId(id);
         Telefone salvo = repositorio.save(atualizado);
         adicionadorLink.adicionarLink(salvo);
-        return new ResponseEntity<>(salvo, HttpStatus.OK);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.OK);
     }
 
     @DeleteMapping("/deletar/{id}")
@@ -65,5 +70,20 @@ public class TelefoneControle {
         }
         repositorio.delete(telefone);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private TelefoneDTO converterParaDTO(Telefone telefone) {
+        TelefoneDTO dto = new TelefoneDTO();
+        dto.setId(telefone.getId());
+        dto.setDdd(telefone.getDdd());
+        dto.setNumero(telefone.getNumero());
+        return dto;
+    }
+
+    private Telefone converterParaEntidade(TelefoneDTO dto) {
+        Telefone telefone = new Telefone();
+        telefone.setDdd(dto.getDdd());
+        telefone.setNumero(dto.getNumero());
+        return telefone;
     }
 }

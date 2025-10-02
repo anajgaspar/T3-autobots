@@ -1,12 +1,15 @@
 package com.autobots.atv3.controles;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import com.autobots.atv3.DTO.VeiculoDTO;
 import com.autobots.atv3.entidades.Veiculo;
+import com.autobots.atv3.entidades.Venda;
 import com.autobots.atv3.links.VeiculoAdicionadorLink;
 import com.autobots.atv3.repositorios.VeiculoRepositorio;
 
@@ -19,44 +22,48 @@ public class VeiculoControle {
     private VeiculoAdicionadorLink adicionadorLink;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Veiculo> obterVeiculo(@PathVariable Long id) {
+    public ResponseEntity<VeiculoDTO> obterVeiculo(@PathVariable Long id) {
         Veiculo veiculo = repositorio.findById(id).orElse(null);
         if (veiculo == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             adicionadorLink.adicionarLink(veiculo);
-            return new ResponseEntity<>(veiculo, HttpStatus.OK);
+            VeiculoDTO dto = converterParaDTO(veiculo);
+            return new ResponseEntity<>(dto, HttpStatus.OK);
         }
     }
 
     @GetMapping
-    public ResponseEntity<List<Veiculo>> obterVeiculos() {
+    public ResponseEntity<List<VeiculoDTO>> obterVeiculos() {
         List<Veiculo> veiculos = repositorio.findAll();
         if (veiculos.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
             adicionadorLink.adicionarLink(veiculos);
-            return new ResponseEntity<>(veiculos, HttpStatus.OK);
+            List<VeiculoDTO> dtos = veiculos.stream().map(this::converterParaDTO).toList();
+            return new ResponseEntity<>(dtos, HttpStatus.OK);
         }
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<Veiculo> registrarVeiculo(@RequestBody Veiculo novo) {
-        Veiculo veiculo = repositorio.save(novo);
-        adicionadorLink.adicionarLink(veiculo);
-        return new ResponseEntity<>(HttpStatus.CREATED);
+    public ResponseEntity<VeiculoDTO> registrarVeiculo(@RequestBody VeiculoDTO novoDTO) {
+        Veiculo novo = converterParaEntidade(novoDTO);
+        Veiculo salvo = repositorio.save(novo);
+        adicionadorLink.adicionarLink(salvo);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.CREATED);
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<Veiculo> atualizarVeiculo(@PathVariable Long id, @RequestBody Veiculo atualizado) {
+    public ResponseEntity<VeiculoDTO> atualizarVeiculo(@PathVariable Long id, @RequestBody VeiculoDTO atualizadoDTO) {
         Veiculo veiculo = repositorio.findById(id).orElse(null);
         if (veiculo == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        } 
+        }
+        Veiculo atualizado = converterParaEntidade(atualizadoDTO);
         atualizado.setId(id);
         Veiculo salvo = repositorio.save(atualizado);
         adicionadorLink.adicionarLink(salvo);
-        return new ResponseEntity<>(salvo, HttpStatus.OK);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.OK);
     }
 
     @DeleteMapping("/deletar/{id}")
@@ -67,5 +74,25 @@ public class VeiculoControle {
         }
         repositorio.delete(veiculo);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private VeiculoDTO converterParaDTO(Veiculo veiculo) {
+        VeiculoDTO dto = new VeiculoDTO();
+        dto.setId(veiculo.getId());
+        dto.setModelo(veiculo.getModelo());
+        dto.setPlaca(veiculo.getPlaca());
+        dto.setProprietario(veiculo.getProprietario());
+        dto.setTipo(veiculo.getTipo());
+        dto.setVendasIds(veiculo.getVendas().stream().map(Venda::getId).collect(Collectors.toSet()));
+        return dto;
+    }
+
+    private Veiculo converterParaEntidade(VeiculoDTO dto) {
+        Veiculo veiculo = new Veiculo();
+        veiculo.setModelo(dto.getModelo());
+        veiculo.setPlaca(dto.getPlaca());
+        veiculo.setProprietario(dto.getProprietario());
+        veiculo.setTipo(dto.getTipo());
+        return veiculo;
     }
 }

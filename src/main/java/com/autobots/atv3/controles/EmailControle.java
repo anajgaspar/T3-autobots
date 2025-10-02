@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.autobots.atv3.DTO.EmailDTO;
 import com.autobots.atv3.entidades.usuario.Email;
 import com.autobots.atv3.links.EmailAdicionadorLink;
 import com.autobots.atv3.repositorios.EmailRepositorio;
@@ -20,42 +21,46 @@ public class EmailControle {
     private EmailAdicionadorLink adicionadorLink;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Email> obterEmail(@PathVariable Long id) {
+    public ResponseEntity<EmailDTO> obterEmail(@PathVariable Long id) {
         Email email = repositorio.findById(id).orElse(null);
         if (email == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         adicionadorLink.adicionarLink(email);
-        return new ResponseEntity<>(email, HttpStatus.OK);
+        EmailDTO dto = converterParaDTO(email);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<Email>> obterEmails() {
+    public ResponseEntity<List<EmailDTO>> obterEmails() {
         List<Email> emails = repositorio.findAll();
         if (emails.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         adicionadorLink.adicionarLink(emails);
-        return new ResponseEntity<>(emails, HttpStatus.OK);
+        List<EmailDTO> dtos = emails.stream().map(this::converterParaDTO).toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<Email> registrarEmail(@RequestBody Email novo) {
+    public ResponseEntity<EmailDTO> registrarEmail(@RequestBody EmailDTO novoDTO) {
+        Email novo = converterParaEntidade(novoDTO);
         Email salvo = repositorio.save(novo);
         adicionadorLink.adicionarLink(salvo);
-        return new ResponseEntity<>(salvo, HttpStatus.CREATED);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.CREATED);
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<Email> atualizarEmail(@PathVariable Long id, @RequestBody Email atualizado) {
+    public ResponseEntity<EmailDTO> atualizarEmail(@PathVariable Long id, @RequestBody EmailDTO atualizadoDTO) {
         Email email = repositorio.findById(id).orElse(null);
         if (email == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        Email atualizado = converterParaEntidade(atualizadoDTO);
         atualizado.setId(id);
         Email salvo = repositorio.save(atualizado);
         adicionadorLink.adicionarLink(salvo);
-        return new ResponseEntity<>(salvo, HttpStatus.OK);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.OK);
     }
 
     @DeleteMapping("/deletar/{id}")
@@ -66,5 +71,18 @@ public class EmailControle {
         }
         repositorio.delete(email);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private EmailDTO converterParaDTO(Email email) {
+        EmailDTO dto = new EmailDTO();
+        dto.setId(email.getId());
+        dto.setEndereco(email.getEndereco());
+        return dto;
+    }
+
+    private Email converterParaEntidade(EmailDTO dto) {
+        Email email = new Email();
+        email.setEndereco(dto.getEndereco());
+        return email;
     }
 }

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 
+import com.autobots.atv3.DTO.EnderecoDTO;
 import com.autobots.atv3.entidades.usuario.Endereco;
 import com.autobots.atv3.links.EnderecoAdicionadorLink;
 import com.autobots.atv3.repositorios.EnderecoRepositorio;
@@ -19,42 +20,46 @@ public class EnderecoControle {
     private EnderecoAdicionadorLink adicionadorLink;
 
     @GetMapping("/{id}")
-    public ResponseEntity<Endereco> obterEndereco(@PathVariable Long id) {
+    public ResponseEntity<EnderecoDTO> obterEndereco(@PathVariable Long id) {
         Endereco endereco = repositorio.findById(id).orElse(null);
         if (endereco == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         adicionadorLink.adicionarLink(endereco);
-        return new ResponseEntity<>(endereco, HttpStatus.OK);
+        EnderecoDTO dto = converterParaDTO(endereco);
+        return new ResponseEntity<>(dto, HttpStatus.OK);
     }
 
     @GetMapping
-    public ResponseEntity<List<Endereco>> obterEnderecos() {
+    public ResponseEntity<List<EnderecoDTO>> obterEnderecos() {
         List<Endereco> enderecos = repositorio.findAll();
         if (enderecos.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         adicionadorLink.adicionarLink(enderecos);
-        return new ResponseEntity<>(enderecos, HttpStatus.OK);
+        List<EnderecoDTO> dtos = enderecos.stream().map(this::converterParaDTO).toList();
+        return new ResponseEntity<>(dtos, HttpStatus.OK);
     }
 
     @PostMapping("/registrar")
-    public ResponseEntity<Endereco> registrarEndereco(@RequestBody Endereco novo) {
+    public ResponseEntity<EnderecoDTO> registrarEndereco(@RequestBody EnderecoDTO novoDTO) {
+        Endereco novo = converterParaEntidade(novoDTO);
         Endereco salvo = repositorio.save(novo);
         adicionadorLink.adicionarLink(salvo);
-        return new ResponseEntity<>(salvo, HttpStatus.CREATED);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.CREATED);
     }
 
     @PutMapping("/atualizar/{id}")
-    public ResponseEntity<Endereco> atualizarEndereco(@PathVariable Long id, @RequestBody Endereco atualizado) {
+    public ResponseEntity<EnderecoDTO> atualizarEndereco(@PathVariable Long id, @RequestBody EnderecoDTO atualizadoDTO) {
         Endereco endereco = repositorio.findById(id).orElse(null);
         if (endereco == null) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        Endereco atualizado = converterParaEntidade(atualizadoDTO);
         atualizado.setId(id);
         Endereco salvo = repositorio.save(atualizado);
         adicionadorLink.adicionarLink(salvo);
-        return new ResponseEntity<>(salvo, HttpStatus.OK);
+        return new ResponseEntity<>(converterParaDTO(salvo), HttpStatus.OK);
     }
 
     @DeleteMapping("/deletar/{id}")
@@ -65,5 +70,30 @@ public class EnderecoControle {
         }
         repositorio.delete(endereco);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    private EnderecoDTO converterParaDTO(Endereco endereco) {
+        EnderecoDTO dto = new EnderecoDTO();
+        dto.setId(endereco.getId());
+        dto.setEstado(endereco.getEstado());
+        dto.setCidade(endereco.getCidade());
+        dto.setBairro(endereco.getBairro());
+        dto.setRua(endereco.getRua());
+        dto.setNumero(endereco.getNumero());
+        dto.setCodigoPostal(endereco.getCodigoPostal());
+        dto.setInformacoesAdicionais(endereco.getInformacoesAdicionais());
+        return dto;
+    }
+
+    private Endereco converterParaEntidade(EnderecoDTO dto) {
+        Endereco endereco = new Endereco();
+        endereco.setEstado(dto.getEstado());
+        endereco.setCidade(dto.getCidade());
+        endereco.setBairro(dto.getBairro());
+        endereco.setRua(dto.getRua());
+        endereco.setNumero(dto.getNumero());
+        endereco.setCodigoPostal(dto.getCodigoPostal());
+        endereco.setInformacoesAdicionais(dto.getInformacoesAdicionais());
+        return endereco;
     }
 }
